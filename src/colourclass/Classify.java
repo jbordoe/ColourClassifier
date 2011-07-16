@@ -62,19 +62,18 @@ public class Classify {
     }
 
     public static String[] clusterFromFolder(String path){
-        ArrayList<String> images = new ArrayList<String>();
+        ArrayList<String> results = new ArrayList<String>();
         File dir = new File(path);
         File[] files = dir.listFiles();
-        int max  = 1;
+        int max  = 7;
         int n = 0;
         for(File f: files){
-            images.add(clusterImage(f.getPath()));
+            results.add(clusterImage(f.getPath()));
             n++;
             if(n>=max){break;}
         }
-        return (String[])images.toArray();
+        return results.toArray(new String[results.size()]);
     }
-
 
     public static String clusterImage(String path){
         Img img = null;

@@ -243,7 +243,7 @@ public class Img {
                  threeDigit.format(c.getRank())+"</div>");
         }
         String colour = ranked.get(0).getCenter().closestColour();
-        results.append("</td></tr><tr><td><div id=\""+colour+"\" class=\"average\"></div>Classified as "+colour);
+        results.append("</td></tr><tr><td><div id=\""+colour+"\" class=\"average\"></div>Classified as "+colour+"</td></tr></table>");
         results.append("</div>");
         //results.append("</td></tr></table></body></html>");
         BufferedWriter out = null;

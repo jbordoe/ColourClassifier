@@ -193,12 +193,12 @@ public class DataPoint {
          double closest = Double.MAX_VALUE;
          String colour = "";
          HashMap<DataPoint,String> colours = new HashMap<DataPoint,String>();
-         colours.put(new DataPoint(0xffff0000,0,0),"red");
+         colours.put(new DataPoint(0xfff00000,0,0),"red");
          colours.put(new DataPoint(0xffff8000,0,0),"orange");
          colours.put(new DataPoint(0xffffff00,0,0),"yellow");
          colours.put(new DataPoint(0xff00ff00,0,0),"green");
          colours.put(new DataPoint(0xff00d8ff,0,0),"teal");
-         colours.put(new DataPoint(0xff0000ff,0,0),"blue");
+         colours.put(new DataPoint(0xff0000f0,0,0),"blue");
          colours.put(new DataPoint(0xff7f00ff,0,0),"purple");
          colours.put(new DataPoint(0xff000000,0,0),"black");
          colours.put(new DataPoint(0xffffffff,0,0),"white");

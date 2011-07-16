@@ -70,7 +70,7 @@ public class Center extends DataPoint {
     }
 
     /**
-     * @return the argb
+     * @return the argb integer
      */
     @Override
     public int getArgb() {
