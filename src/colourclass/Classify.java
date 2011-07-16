@@ -17,6 +17,8 @@ public class Classify {
     public static BufferedImage image;
     /** number of clustering results to show per page */
     private static final int perPage = 3;
+    /** maximum number of images to classify in a folder */
+    private static int max = 7;
     /**
      * @param args the command line arguments
      */
@@ -65,7 +67,6 @@ public class Classify {
         ArrayList<String> results = new ArrayList<String>();
         File dir = new File(path);
         File[] files = dir.listFiles();
-        int max  = 7;
         int n = 0;
         for(File f: files){
             results.add(clusterImage(f.getPath()));
@@ -98,27 +99,34 @@ public class Classify {
                 f.delete();
             }
         }
+        String[] links = makePageLinks((res.length/perPage)+1);
         int total = res.length;
-        int pages = 0;
-        int n = 0;
-        while(n < total) {
+        int currentPage = 0;
+        int currentImage = 0;
+        while(currentImage < total) {
             BufferedWriter out = null;
             try {
-                FileOutputStream fstream = new FileOutputStream("C:/Temp/cluster/results-"+pages+".html");
+                FileOutputStream fstream = new FileOutputStream("C:/Temp/cluster/results-"+currentPage+".html");
                 out = new BufferedWriter(new OutputStreamWriter(fstream, "cp1250"));
                 out.write("<html><head><title>Results</title>" +
                 "<LINK REL=stylesheet TYPE=\"text/css\" HREF=\"style.css\">" +
                 "</head><body>");
+                for(int i = 0; i<perPage; i++){
+                    String divider = i+1!=perPage?" | ":" ";
+                    String link = i==currentPage?""+i:links[i];
+                    out.write(link+divider);
+                }
+                out.write("<br>");
                 for(int m = 0; m < perPage; m++) {
                     try {
-                        out.write(res[n]);
+                        out.write(res[currentImage]);
                     } catch(ArrayIndexOutOfBoundsException e) {
                         break;
                     }
                    catch (Exception e) {
                         System.err.println("Error: " + e.getMessage());
                     }
-                    n++;
+                    currentImage++;
                 }
                 out.write("</body></html><head>");
             } catch (Exception e) {
@@ -132,7 +140,7 @@ public class Classify {
                     }
                 }
             }
-            pages++;
+            currentPage++;
         }
     }
 //            } finally { /* Ensure file is closed no matter what */
@@ -178,6 +186,14 @@ public class Classify {
         if(!thumbs.exists()){
             thumbs.mkdir();
         }
+    }
+
+    private static String[] makePageLinks(int pages){
+        String[] links = new String[pages];
+        for(int i = 0; i < pages; i++){
+            links[i] = "<a href=\"results-"+i+".html\">"+i+"</a>";
+        }
+        return links;
     }
   
 

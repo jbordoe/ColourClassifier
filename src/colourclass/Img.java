@@ -38,7 +38,7 @@ public class Img {
     ImageWriter writer;
     ImageWriteParam iwp;
     /** length of longest side in rescaled image */
-    private static final int rescale = 300;
+    private static final int rescale = 200;
     /** number of clusters */
     private static final int k = 6;
 
