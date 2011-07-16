@@ -88,10 +88,12 @@ public class DataPoint {
     }
 
     /**
-     * @param p point to calculate distance from
+     * calculate the distance between two points in CIE lab space, weighted so that luminosity is given less
+     * emphasis (making different shades of the same colour closer)
+     * @param p point to calculate weighted distance from
      * @return euclidian distance of this point and argument point
      */
-    private double distanceFrom(DataPoint p){
+    private double weightedDistanceFrom(DataPoint p){
         //double[] vals = p.getVals();
         double[] cie = p.getCIE();
         //return Math.sqrt(Math.pow((r-vals[0])/255,2) + Math.pow((g-vals[1])/255,2) + Math.pow((b-vals[2])/255,2));
@@ -126,7 +128,7 @@ public class DataPoint {
         Cluster closestCluster = null;
         double closestDistance = Double.MAX_VALUE;
         for (Cluster c : clusters) {
-            double dist = distanceFrom(c.getCenter());
+            double dist = weightedDistanceFrom(c.getCenter());
             if (closestCluster == null || dist < closestDistance) {
                 closestCluster = c;
                 closestDistance = dist;
@@ -189,6 +191,10 @@ public class DataPoint {
          b = (int) (Math.round((double)b*levels/255) * ((double)255/levels));
      }
 
+     /**
+      *
+      * @return <code>String</code> denoting the colour this cluster is closest to
+      */
      public String closestColour(){
          double closest = Double.MAX_VALUE;
          String colour = "";
@@ -214,17 +220,11 @@ public class DataPoint {
                  closest = dist;
              }
          }
+        return colour;
+    }
 
-         return colour;
-     }
-
-
-
-
-
-
-    public double[] getCIE(){
-        return new double[]{CIE_l,CIE_a,CIE_b};
+    public double[] getCIE() {
+        return new double[]{CIE_l, CIE_a, CIE_b};
     }
 
 

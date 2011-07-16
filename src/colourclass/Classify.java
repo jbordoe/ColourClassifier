@@ -1,7 +1,5 @@
 package colourclass;
 
-import java.awt.*;
-import java.awt.geom.*;
 import java.awt.image.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ public class Classify {
     /** number of clustering results to show per page */
     private static final int perPage = 3;
     /** maximum number of images to classify in a folder */
-    private static int max = 7;
+    private static int max = 1;
     /**
      * @param args the command line arguments
      */
@@ -114,26 +112,25 @@ public class Classify {
 
                 //Generate links to other results pages
                 String links = "";
-                for(int i = 0; i<perPage; i++){
-                    String divider = i+1!=perPage?" | ":" ";
-                    String link = i==currentPage?""+i:linkArr[i];
-                    links+=link+divider;
+                for (int i = 0; i < linkArr.length; i++) {
+                    String divider = i + 1 != perPage ? " | " : " ";
+                    String link = i == currentPage ? "" + i : linkArr[i];
+                    links += link + divider;
                 }
-                out.write(links+"<br>");
-                for(int m = 0; m < perPage; m++) {
+                out.write(links + "<br>");
+                for (int m = 0; m < perPage; m++) {
                     try {
                         out.write(res[currentImage]);
-                    } catch(ArrayIndexOutOfBoundsException e) {
+                    } catch (ArrayIndexOutOfBoundsException e) { //stop if there are no more results to show
                         break;
-                    }
-                   catch (Exception e) {
-                        System.err.println("Error: " + e.getMessage());
+                    } catch (Exception e) { //Deal safely with any (unexpected) errors
+                        System.err.println("Results Output Error: " + e.getMessage());
                     }
                     currentImage++;
                 }
-                out.write(links+"<br></body></html><head>");
+                out.write(links + "<br></body></html><head>");
             } catch (Exception e) {
-                System.err.println("Error: " + e.getMessage());
+                System.err.println("HTML Generation Error: " + e.getMessage());
             } finally { /* Ensure file is closed no matter what */
                 if (out != null) {
                     try {

@@ -5,10 +5,6 @@
 
 package colourclass;
 
-import java.awt.*;
-import java.awt.geom.*;
-import java.awt.image.*;
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
