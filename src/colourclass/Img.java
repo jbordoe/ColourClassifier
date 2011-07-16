@@ -189,10 +189,10 @@ public class Img {
         outputJPEG(scaled, "C:/Temp/cluster/thumbs/"+name+".jpg");
         BufferedImage segmentedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
         results.append("<div>");
-        results.append("<img src=\"thumbs/"+name+".jpg\" id=\"pic\">" +
-                "<img src=\"thumbs/"+name+"-seg.jpg\" id=\"seg\">"+
-                "<img src=\"thumbs/"+name+".jpg\" id=\"cut\">" +
-                "<img src=\"thumbs/"+name+".jpg\" id=\"avg\"><br>");
+        results.append("<img src=\"thumbs/"+name+".jpg\" id=\"pic-"+name+"\">" +
+                "<img src=\"thumbs/"+name+"-seg.jpg\" id=\"seg-"+name+"\">"+
+                "<img src=\"thumbs/"+name+".jpg\" id=\"cut-"+name+"\">" +
+                "<img src=\"thumbs/"+name+".jpg\" id=\"avg-"+name+"\"><br>");
         for (Cluster c : clusters) {
             if(c.getSize()==0){
                 continue;
@@ -202,10 +202,10 @@ public class Img {
             String percentage = oneDigit.format(((double)c.getSize()*100)/(w*h));
             results.append("<div class=\"palette\" style=\"" +
                     "background-color: " + c.getCenter().toHexTriplet() + "\" " +
-                    "onmouseover=\"document.getElementById('cut').src='thumbs/"+name+""+n+".jpg'; " +
-                    "document.getElementById('avg').src='thumbs/"+name+""+n+"-avg.jpg';\" " +
-                    "onmouseout=\"document.getElementById('avg').src='thumbs/"+name+".jpg'; " +
-                    "document.getElementById('cut').src='thumbs/"+name+".jpg';\" >" + c.getCenter().toHexTriplet() + "" +
+                    "onmouseover=\"document.getElementById('cut-"+name+"').src='thumbs/"+name+""+n+".jpg'; " +
+                    "document.getElementById('avg-"+name+"').src='thumbs/"+name+""+n+"-avg.jpg';\" " +
+                    "onmouseout=\"document.getElementById('avg-"+name+"').src='thumbs/"+name+".jpg'; " +
+                    "document.getElementById('cut-"+name+"').src='thumbs/"+name+".jpg';\" >" + c.getCenter().toHexTriplet() + "" +
                     "<div class=\"size\">"+percentage+"%</div></div>");
 
             /* create graphical representation of cluster */

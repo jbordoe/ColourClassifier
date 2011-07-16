@@ -99,7 +99,7 @@ public class Classify {
                 f.delete();
             }
         }
-        String[] links = makePageLinks((res.length/perPage)+1);
+        String[] linkArr = makePageLinks((res.length/perPage)+1);
         int total = res.length;
         int currentPage = 0;
         int currentImage = 0;
@@ -111,12 +111,15 @@ public class Classify {
                 out.write("<html><head><title>Results</title>" +
                 "<LINK REL=stylesheet TYPE=\"text/css\" HREF=\"style.css\">" +
                 "</head><body>");
+
+                //Generate links to other results pages
+                String links = "";
                 for(int i = 0; i<perPage; i++){
                     String divider = i+1!=perPage?" | ":" ";
-                    String link = i==currentPage?""+i:links[i];
-                    out.write(link+divider);
+                    String link = i==currentPage?""+i:linkArr[i];
+                    links+=link+divider;
                 }
-                out.write("<br>");
+                out.write(links+"<br>");
                 for(int m = 0; m < perPage; m++) {
                     try {
                         out.write(res[currentImage]);
@@ -128,7 +131,7 @@ public class Classify {
                     }
                     currentImage++;
                 }
-                out.write("</body></html><head>");
+                out.write(links+"<br></body></html><head>");
             } catch (Exception e) {
                 System.err.println("Error: " + e.getMessage());
             } finally { /* Ensure file is closed no matter what */
