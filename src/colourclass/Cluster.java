@@ -19,10 +19,12 @@ public class Cluster {
     private ArrayList<DataPoint> pixels;
     private boolean converged = false;
     private double rank;
+    private Img parent;
 
-    public Cluster(DataPoint d){
+    public Cluster(DataPoint d, Img parent){
         center = d;
         pixels = new ArrayList<DataPoint>();
+        this.parent = parent;
     }
 
     /**
@@ -127,7 +129,7 @@ public class Cluster {
         }
         centered = centered/pixels.size();
         sat = sat / pixels.size();
-        rank = centered + percentage + sat/4;
+        rank = Math.pow(percentage,0.5) * (centered*0.5 + sat*0.4 + getSpread()*0.3);
     }
 
     /**
@@ -135,6 +137,34 @@ public class Cluster {
      */
     public double getRank() {
         return rank;
+    }
+
+    private double getSpread(){
+        Cluster[][] assignments = parent.getAssignments();
+        double score = 0;
+        for(DataPoint d: pixels){
+            int x = d.getX();
+            int y = d.getY();
+            int compared = 0;
+            int same = 0;
+            //check the 3x3 grid round the pixel
+            for(int i = x-1; i < x+2; i++){
+                if(i < 0 || i >= assignments.length){
+                    continue;
+                }
+                for(int j = y-1; j < y+2; j++){
+                    if(j<0 || j>= assignments[0].length ){
+                        continue;
+                    }
+                    compared++;
+                    if(assignments[i][j]==this){
+                        same++;
+                    }
+                }
+            }
+            score += (double)same/compared;
+        }
+        return score/pixels.size();
     }
 
 }

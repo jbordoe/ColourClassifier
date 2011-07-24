@@ -16,19 +16,29 @@ public class Classify {
     /** number of clustering results to show per page */
     private static final int perPage = 3;
     /** maximum number of images to classify in a folder */
-    private static int max = 1;
+    private static int max = 30;
+    /** flags whether clustering multiple images from a folder, or a single image */
+    private static boolean folder;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+
+        try {
+            parseArgs();
+        } catch (Exception e) {
+            System.out.print("invalid arguments provided!");
+            showHelp();
+            return;
+        }
         /* get image path from command line args */
         try {
             String path = args[0];
-            if(path.equals("-help") || path.equals("-h")){
+            if (path.equals("-help") || path.equals("-h")) {
                 showHelp();
                 return;
             }
-            if(path.matches(".*?\\.(jpg|gif|jpeg)")){
+            if (path.matches(".*?\\.(jpg|gif|jpeg)")) {
                 init();
                 System.out.println("reading single image");
                 String res = clusterImage(path);
@@ -61,6 +71,10 @@ public class Classify {
         }
     }
 
+    public static void parseArgs(){
+
+    }
+
     public static String[] clusterFromFolder(String path){
         ArrayList<String> results = new ArrayList<String>();
         File dir = new File(path);
@@ -79,7 +93,7 @@ public class Classify {
         File imgFile = new File(path);
         try{
             image = ImageIO.read(imgFile);
-            if(imgFile.getName().matches(".*?\\.(jpg|gif|jpeg)")){
+            if(imgFile.getName().matches(".*?\\.(jpg|gif|jpeg|JPG)")){
                             img = new Img(image,imgFile.getName());
                             img.findClusters();
             }
@@ -97,7 +111,7 @@ public class Classify {
                 f.delete();
             }
         }
-        String[] linkArr = makePageLinks((res.length/perPage)+1);
+        String[] linkArr = makePageLinks((int)Math.ceil(res.length/perPage));
         int total = res.length;
         int currentPage = 0;
         int currentImage = 0;
@@ -111,9 +125,9 @@ public class Classify {
                 "</head><body>");
 
                 //Generate links to other results pages
-                String links = "";
+                String links = "<b>Pages: </b>";
                 for (int i = 0; i < linkArr.length; i++) {
-                    String divider = i + 1 != perPage ? " | " : " ";
+                    String divider = i != linkArr.length-1 ? " | " : " ";
                     String link = i == currentPage ? "" + i : linkArr[i];
                     links += link + divider;
                 }

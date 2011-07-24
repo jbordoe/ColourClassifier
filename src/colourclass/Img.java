@@ -58,7 +58,7 @@ public class Img {
             int centerX = rand.nextInt(w);
             int centerY = rand.nextInt(h);
             DataPoint center = grid[centerX][centerY];
-            clusters.add(new Cluster(center));
+            getClusters().add(new Cluster(center,this));
         }
 
 
@@ -78,7 +78,7 @@ public class Img {
             System.out.println("run #" + runs);
             HashMap<Cluster, ArrayList<DataPoint>> clusterMapping = new HashMap<Cluster, ArrayList<DataPoint>>();
 
-            for (Cluster c : clusters) {
+            for (Cluster c : getClusters()) {
                 clusterMapping.put(c, new ArrayList<DataPoint>());
                 if (runs > 1) {
                     c.setConverged(true);
@@ -88,18 +88,18 @@ public class Img {
             for (int x = 0; x < w; x++) {
                 for (int y = 0; y < h; y++) {
                     DataPoint p = grid[x][y];
-                    Cluster closest = p.getClosest(clusters);
+                    Cluster closest = p.getClosest(getClusters());
                     clusterMapping.get(closest).add(p);
                     newAssignments[x][y] = closest;
-                    if (closest != assignments[x][y] && assignments[x][y] != null) {
-                        assignments[x][y].setConverged(false);
+                    if (closest != getAssignments()[x][y] && getAssignments()[x][y] != null) {
+                        getAssignments()[x][y].setConverged(false);
                         closest.setConverged(false);
                     }
                 }
             }
             boolean allConverged = true;
             /* update clusters and check for convergence */
-            for (Cluster c : clusters) {
+            for (Cluster c : getClusters()) {
                 c.setPixels(clusterMapping.get(c));
                 allConverged = c.isConverged() && allConverged;
             }
@@ -165,7 +165,7 @@ public class Img {
 
     private void printClusters() {
         System.out.println("\tCluster Centers:");
-        for (Cluster c : clusters) {
+        for (Cluster c : getClusters()) {
             System.out.println("\t"+c.getCenter().toHexTriplet());
         }
     }
@@ -193,7 +193,7 @@ public class Img {
                 "<img src=\"thumbs/"+name+"-seg.jpg\" id=\"seg-"+name+"\">"+
                 "<img src=\"thumbs/"+name+".jpg\" id=\"cut-"+name+"\">" +
                 "<img src=\"thumbs/"+name+".jpg\" id=\"avg-"+name+"\"><br>");
-        for (Cluster c : clusters) {
+        for (Cluster c : getClusters()) {
             if(c.getSize()==0){
                 continue;
             }
@@ -281,9 +281,9 @@ public class Img {
      */
     private void sortClustersBySize(){
         ArrayList<Cluster> sorted = new ArrayList<Cluster>();
-        while (clusters.size() > 0) {
+        while (getClusters().size() > 0) {
             boolean inserted = false;
-            Cluster c = clusters.remove(0);
+            Cluster c = getClusters().remove(0);
             for(int i = 0; i<sorted.size(); i++) {
                 if(sorted.get(i).getSize() < c.getSize()){
                     sorted.add(i,c);
@@ -302,13 +302,13 @@ public class Img {
      * put clusters in order of rank (insertion sort)
      */
     private ArrayList<Cluster> sortClustersByRank(){
-        for(Cluster c: clusters){
+        for(Cluster c: getClusters()){
             c.rank(w,h);
         }
         ArrayList<Cluster> sorted = new ArrayList<Cluster>();
-        while (clusters.size() > 0) {
+        while (getClusters().size() > 0) {
             boolean inserted = false;
-            Cluster c = clusters.remove(0);
+            Cluster c = getClusters().remove(0);
             for(int i = 0; i<sorted.size(); i++) {
                 if(sorted.get(i).getRank() < c.getRank()){
                     sorted.add(i,c);
@@ -332,5 +332,19 @@ public class Img {
                 scaled.setRGB(i,j,grid[i][j].getArgb());
             }
         }
+    }
+
+    /**
+     * @return the clusters
+     */
+    public ArrayList<Cluster> getClusters() {
+        return clusters;
+    }
+
+    /**
+     * @return the assignments
+     */
+    public Cluster[][] getAssignments() {
+        return assignments;
     }
 }

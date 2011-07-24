@@ -93,11 +93,11 @@ public class DataPoint {
      * @param p point to calculate weighted distance from
      * @return euclidian distance of this point and argument point
      */
-    private double weightedDistanceFrom(DataPoint p){
+    private double weightedDistanceFrom(DataPoint p, double weight) {
         //double[] vals = p.getVals();
         double[] cie = p.getCIE();
         //return Math.sqrt(Math.pow((r-vals[0])/255,2) + Math.pow((g-vals[1])/255,2) + Math.pow((b-vals[2])/255,2));
-        return Math.sqrt(Math.pow(cie[0]-CIE_l, 2)*0.5 //CIE luminosity
+        return Math.sqrt(Math.pow(cie[0]-CIE_l, 2)*weight //CIE luminosity
                 + Math.pow(cie[1]-CIE_a, 2)         //CIE red-green axis
                 + Math.pow(cie[2]-CIE_b, 2)         //CIE blue-yellow axis
                 );
@@ -128,7 +128,7 @@ public class DataPoint {
         Cluster closestCluster = null;
         double closestDistance = Double.MAX_VALUE;
         for (Cluster c : clusters) {
-            double dist = weightedDistanceFrom(c.getCenter());
+            double dist = weightedDistanceFrom(c.getCenter(),0.3);
             if (closestCluster == null || dist < closestDistance) {
                 closestCluster = c;
                 closestDistance = dist;
@@ -148,14 +148,14 @@ public class DataPoint {
     /**
      * @return the x
      */
-    public double getX() {
+    public int getX() {
         return x_pos;
     }
 
     /**
      * @return the y
      */
-    public double getY() {
+    public int getY() {
         return y_pos;
     }
     
@@ -214,7 +214,7 @@ public class DataPoint {
          colours.put(new DataPoint(0xfffbc8ab,0,0),"flesh");
 
          for(DataPoint d: colours.keySet()){
-             double dist  = trueDistanceFrom(d);
+             double dist  = weightedDistanceFrom(d,0.7);
              if(dist<closest){
                  colour = colours.get(d);
                  closest = dist;
