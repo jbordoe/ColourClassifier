@@ -49,22 +49,6 @@ public class Classify {
                 String[] results = clusterFromFolder(path);
                 outputResults(results);
             }
-
-
-
-//            File dir = new File("C:/wamp/www/Pitchfork/Thumbs/Large");
-//            File[] files = dir.listFiles();
-//            Random r = new Random();
-//            int n = r.nextInt(files.length);
-//            imgPath = args[0];
-//            System.out.println("opening file: "+imgPath);
-//            //File imgFile = new File(imgPath);
-//            File imgFile = files[n];
-//            if(!imgFile.isFile()) {
-//                throw new Exception();
-//            }
-//            image = ImageIO.read(imgFile);
-//            new Img(image,imgFile.getName()).findClusters();
         } catch(Exception e) {
             System.out.println("Problem with clustering!: "+e);
             return;
