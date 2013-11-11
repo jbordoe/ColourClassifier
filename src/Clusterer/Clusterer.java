@@ -13,7 +13,6 @@ public class Clusterer {
     private double[][] dataPoints;
     private int dimensions;
     private int datasetSize;
-    
     private boolean verbose = false;
     /**
      * Number of clusters to generate from dataset
@@ -26,6 +25,11 @@ public class Clusterer {
         this.datasetSize = dataPoints.length;
     }
 
+    /**
+     * Run the k-means clustering algorithm on the dataset we initialised with
+     *
+     * @return array of Cluster objects
+     */
     public Cluster[] findClusters() {
 
         say("Initializing centers...");
@@ -38,7 +42,7 @@ public class Clusterer {
 
         while (!clustersConverged) {
             runs++;
-            say("Run: " +  runs);
+            say("Run: " + runs);
             say("Moving centers...");
             centers = moveCenters(assignments);
             say("Reassingning...");
@@ -58,6 +62,14 @@ public class Clusterer {
         return clusters;
     }
 
+    /**
+     * Obtain a list of all data points mapped to a certain cluster/center
+     *
+     * @param dataPoints array of n-dimensional data points
+     * @param assignments
+     * @param label index of cluster whose data points we wish to retrieve
+     * @return
+     */
     private double[][] filterDataPoints(double[][] dataPoints, int[] assignments, int label) {
         ArrayList<double[]> filteredDataPoints = new ArrayList<double[]>();
 
@@ -70,7 +82,11 @@ public class Clusterer {
     }
 
     /**
+     * Use one of various methods to select data points to be used as 'centers'
+     * for our initialisation of the clustering algorithm
      *
+     * @return array of centers (each center is an n-dimensional array of
+     * doubles)
      */
     private double[][] initializeCenters() {
         switch (centerSelection) {
@@ -86,6 +102,11 @@ public class Clusterer {
         }
     }
 
+    /**
+     * Select given number of centers from existing data points in our dataset
+     *
+     * @return
+     */
     private double[][] centersFromDataset() {
         double[][] centers = new double[k][dimensions];
         int i = 0;
@@ -102,6 +123,11 @@ public class Clusterer {
         return centers;
     }
 
+    /**
+     * Select given number of centers at random from within defined space
+     *
+     * @return
+     */
     private double[][] centersAtRandom() {
         /*
          * TODO: this is a no-op! 
@@ -111,6 +137,13 @@ public class Clusterer {
         return null;
     }
 
+    /**
+     * Move cluster centers according to data points in each cluster: center
+     * should be the average value of all datapoints in it's cluster
+     *
+     * @param assignments
+     * @return
+     */
     private double[][] moveCenters(int[] assignments) {
         double[][] centers = new double[k][dimensions];
 
@@ -134,9 +167,16 @@ public class Clusterer {
         return centers;
     }
 
+    /**
+     * Determine whether assignments of data points to clusters has changed over
+     * an iteration
+     *
+     * @param oldAssignments assignments from previous iteration
+     * @param newAssignments assignments from this iteration
+     * @return true if assignments have changed, false if not
+     */
     private boolean assignmentsHaveChanged(int[] oldAssignments, int[] newAssignments) {
         for (int i = 0; i < datasetSize; i++) {
-            say("old: " + oldAssignments[i] + ", new: " + newAssignments[i]);
             if (oldAssignments[i] != newAssignments[i]) {
                 return true;
             }
@@ -146,8 +186,10 @@ public class Clusterer {
 
     /**
      * Given a list of centers, assign each data point to it's closest center
-     * @param centers array of centers (which are themselves n-dimensional arrays)
-     * @return 
+     *
+     * @param centers array of centers (which are themselves n-dimensional
+     * arrays)
+     * @return
      */
     private int[] assignDataPoints(double[][] centers) {
         int[] assignments = new int[datasetSize];
@@ -159,6 +201,14 @@ public class Clusterer {
         return assignments;
     }
 
+    /**
+     * Given an array of centers, return index of center with smallest euclidian
+     * distance from data point
+     *
+     * @param dataPoint n-dimensional array
+     * @param centers array of data points
+     * @return
+     */
     private int getIndexOfClosestCenter(double[] dataPoint, double[][] centers) {
         int indexOfClosest = -1;
         double closestDistance = Double.MAX_VALUE;
@@ -168,7 +218,6 @@ public class Clusterer {
             if (indexOfClosest == -1 || dist < closestDistance) {
                 indexOfClosest = i;
                 closestDistance = dist;
-                say("DIST: " + dist);
             }
         }
         return indexOfClosest;
@@ -188,7 +237,12 @@ public class Clusterer {
         }
         return Math.sqrt(sumOfSquaredDifferences);
     }
-    
+
+    /**
+     * Output given string only if in verbose mode
+     *
+     * @param s the String to print
+     */
     private void say(String s) {
         if (verbose) {
             System.out.println(s);
@@ -210,7 +264,7 @@ public class Clusterer {
     }
 
     /**
-     * @param verbose the verbose to set
+     * @param verbose flags whether in verbose mode (see 'say(String s)' )
      */
     public void setVerbose(boolean verbose) {
         this.verbose = verbose;
