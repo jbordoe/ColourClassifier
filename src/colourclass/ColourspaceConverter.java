@@ -4,7 +4,7 @@ package colourclass;
  *
  * @author Jesse Bordoe
  */
-public class Converter {
+public class ColourspaceConverter {
     /**
      * map from RGB colour space to CIE(L*,a,b)
      * @return array containing L*, a and b components

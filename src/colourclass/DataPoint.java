@@ -27,7 +27,7 @@ public class DataPoint {
     /** blue-yellow axis */
     protected double CIE_b;
     /** the cluster this point is assigned to */
-    private Cluster cluster;
+    private ImgCluster cluster;
     /** full aRGB bitstring */
     private int argb;
     /** saturation */
@@ -45,7 +45,7 @@ public class DataPoint {
         this.y_pos = y;
         this.argb = (0xff << 24) | ((int)rgb[0] << 16) | ((int)rgb[1] << 8) | (int)rgb[2];
         sat = Math.max(Math.max(r,g),b) - Math.min(Math.min(r,g),b);
-        double[]cie = Converter.RGBtoCIE(r,g,b);
+        double[]cie = ColourspaceConverter.RGBtoCIE(r,g,b);
         CIE_l = cie[0];
         CIE_a = cie[1];
         CIE_b = cie[2];
@@ -63,7 +63,7 @@ public class DataPoint {
         g = gi;
         b = bi;
         sat = Math.max(Math.max(r,g),b) - Math.min(Math.min(r,g),b);
-        double[]cie = Converter.RGBtoCIE(r,g,b);
+        double[]cie = ColourspaceConverter.RGBtoCIE(r,g,b);
         CIE_l = cie[0];
         CIE_a = cie[1];
         CIE_b = cie[2];
@@ -118,16 +118,16 @@ public class DataPoint {
     }
     /**
      *
-     * @return arroy containing values of this data point, in order r,g,b,saturation,x,y
+     * @return array containing values of this data point, in order r,g,b,saturation,x,y
      */
     public double[] getVals() {
         return new double[]{r, g, b, sat, x_pos, y_pos};
     }
 
-    public Cluster getClosest(ArrayList<Cluster> clusters) {
-        Cluster closestCluster = null;
+    public ImgCluster getClosest(ArrayList<ImgCluster> clusters) {
+        ImgCluster closestCluster = null;
         double closestDistance = Double.MAX_VALUE;
-        for (Cluster c : clusters) {
+        for (ImgCluster c : clusters) {
             double dist = weightedDistanceFrom(c.getCenter(),0.3);
             if (closestCluster == null || dist < closestDistance) {
                 closestCluster = c;
@@ -161,7 +161,7 @@ public class DataPoint {
     
    
      public void CIEtoRGB(){
-        double[] rgb = Converter.CIEtoRGB(CIE_l,CIE_a,CIE_b);
+        double[] rgb = ColourspaceConverter.CIEtoRGB(CIE_l,CIE_a,CIE_b);
         r = (int)rgb[0];
         g = (int)rgb[1];
         b = (int)rgb[2];

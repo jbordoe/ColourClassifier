@@ -42,7 +42,7 @@ public class Center extends DataPoint {
     }
     @Override
      public void CIEtoRGB(){
-        double[] rgb = Converter.CIEtoRGB(CIE_l,CIE_a,CIE_b);
+        double[] rgb = ColourspaceConverter.CIEtoRGB(CIE_l,CIE_a,CIE_b);
         r_dim = rgb[0];
         g_dim = rgb[1];
         b_dim = rgb[2];

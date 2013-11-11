@@ -3,7 +3,6 @@ package colourclass;
 import java.awt.image.*;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Random;
 import javax.imageio.*;
 /**
  *
@@ -24,6 +23,7 @@ public class Classify {
      */
     public static void main(String[] args) {
 
+        // TODO: use a library to process these args (Apache Commons CLI?)
         try {
             parseArgs();
         } catch (Exception e) {
@@ -51,7 +51,6 @@ public class Classify {
             }
         } catch(Exception e) {
             System.out.println("Problem with clustering!: "+e);
-            return;
         }
     }
 

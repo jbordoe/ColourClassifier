@@ -1,8 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
 package colourclass;
 
 import java.util.ArrayList;
@@ -12,7 +7,7 @@ import java.util.Random;
  *
  * @author Jesse Bordoe
  */
-public class Cluster {
+public class ImgCluster {
     private static final Random rand = new Random();
     private DataPoint center;
     /** pixels assigned to this cluster */
@@ -21,7 +16,7 @@ public class Cluster {
     private double rank;
     private Img parent;
 
-    public Cluster(DataPoint d, Img parent){
+    public ImgCluster(DataPoint d, Img parent){
         center = d;
         pixels = new ArrayList<DataPoint>();
         this.parent = parent;
@@ -140,7 +135,7 @@ public class Cluster {
     }
 
     private double getSpread(){
-        Cluster[][] assignments = parent.getAssignments();
+        ImgCluster[][] assignments = parent.getAssignments();
         double score = 0;
         for(DataPoint d: pixels){
             int x = d.getX();
