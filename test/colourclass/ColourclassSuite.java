@@ -17,7 +17,7 @@ import org.junit.runners.Suite;
  * @author Jesse-SouljaBoy-FanB
  */
 @RunWith(Suite.class)
-@Suite.SuiteClasses({colourclass.ImgTest.class,colourclass.MainTest.class,colourclass.ClusterTest.class,colourclass.DataPointTest.class})
+@Suite.SuiteClasses({colourclass.ImgTest.class,colourclass.MainTest.class,colourclass.DataPointTest.class})
 public class ColourclassSuite {
 
     @BeforeClass

@@ -17,7 +17,7 @@ public class Clusterer {
     /**
      * Number of clusters to generate from dataset
      */
-    private int k = 4;
+    private int k = 7;
 
     public Clusterer(double[][] dataPoints) {
         this.dataPoints = dataPoints;

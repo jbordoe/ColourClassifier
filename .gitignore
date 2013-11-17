@@ -5,3 +5,4 @@ manifest.mf
 build.xml
 !src
 !test
+/src/Clusterer/ClusterGen.java

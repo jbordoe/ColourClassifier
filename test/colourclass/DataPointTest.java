@@ -75,10 +75,10 @@ public class DataPointTest {
     @Test
     public void testGetClosest() {
         System.out.println("getClosest");
-        ArrayList<Cluster> clusters = null;
+        ArrayList<ImgCluster> clusters = null;
         DataPoint instance = null;
-        Cluster expResult = null;
-        Cluster result = instance.getClosest(clusters);
+        ImgCluster expResult = null;
+        ImgCluster result = instance.getClosest(clusters);
         assertEquals(expResult, result);
         // TODO review the generated test code and remove the default call to fail.
         fail("The test case is a prototype.");

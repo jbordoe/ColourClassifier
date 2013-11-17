@@ -1,9 +1,12 @@
 package colourclass;
 
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 import java.io.*;
 import java.util.ArrayList;
 import javax.imageio.*;
+
 /**
  *
  * @author Jesse Bordoe
@@ -12,12 +15,19 @@ public class Classify {
 
     public static String imgPath;
     public static BufferedImage image;
-    /** number of clustering results to show per page */
+    /**
+     * number of clustering results to show per page
+     */
     private static final int perPage = 3;
-    /** maximum number of images to classify in a folder */
+    /**
+     * maximum number of images to classify in a folder
+     */
     private static int max = 30;
-    /** flags whether clustering multiple images from a folder, or a single image */
+    /**
+     * flags whether clustering multiple images from a folder, or a single image
+     */
     private static boolean folder;
+
     /**
      * @param args the command line arguments
      */
@@ -47,70 +57,98 @@ public class Classify {
                 init();
                 System.out.println("reading folder");
                 String[] results = clusterFromFolder(path);
-                outputResults(results);
+                //outputResults(results);
             }
-        } catch(Exception e) {
-            System.out.println("Problem with clustering!: "+e);
+        } catch (Exception e) {
+            System.out.println("Problem with clustering!: " + e);
         }
     }
 
-    public static void parseArgs(){
-
+    public static void parseArgs() {
     }
 
-    public static String[] clusterFromFolder(String path){
+    public static String[] clusterFromFolder(String path) {
         ArrayList<String> results = new ArrayList<String>();
         File dir = new File(path);
         File[] files = dir.listFiles();
         int n = 0;
-        for(File f: files){
+        for (File f : files) {
             results.add(clusterImage(f.getPath()));
             n++;
-            if(n>=max){break;}
+            if (n >= max) {
+                break;
+            }
         }
         return results.toArray(new String[results.size()]);
     }
 
-    public static String clusterImage(String path){
-        Img img = null;
-        File imgFile = new File(path);
-        try{
-            image = ImageIO.read(imgFile);
-            if(imgFile.getName().matches(".*?\\.(jpg|gif|jpeg|JPG)")){
-                            img = new Img(image,imgFile.getName());
-                            img.findClusters();
-            }
-        } catch(Exception e) {
-            System.out.println("error during clustering!: "+e);
+    private static BufferedImage rescale(BufferedImage img, double longestEdge) {
+        int width = img.getWidth();
+        int height = img.getHeight();
+        
+        double rescaleFactor;
+        
+        if (width > height && width > longestEdge) {
+            rescaleFactor = longestEdge/width;
+        } else if (height >= width && height > longestEdge) {
+            rescaleFactor = longestEdge/height;
+        } else {
+            rescaleFactor = 1;
         }
-        return img.outputClusteringResults();
+        
+        int newWidth = (int)(width * rescaleFactor);
+        int newHeight = (int)(height * rescaleFactor);
+        
+        BufferedImage rescaledImage = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = rescaledImage.createGraphics();
+        AffineTransform at =
+                AffineTransform.getScaleInstance(rescaleFactor, rescaleFactor);
+        g.drawRenderedImage(img, at);
+        return rescaledImage;
     }
 
-    private static void outputResults(String[] res){
+    public static String clusterImage(String path) {
+        Img img = null;
+        File imgFile = new File(path);
+        try {
+            image = ImageIO.read(imgFile);
+            image = rescale(image,200);
+            // TODO: do this check earlier...
+            if (imgFile.getName().matches("^.*?\\.(jpg|gif|jpeg|JPG)$")) {
+                img = new Img(image, imgFile.getName());
+                img.findClusters();
+            }
+        } catch (Exception e) {
+            System.out.println("error during clustering!: " + e);
+        }
+        return ""; //img.outputClusteringResults();
+    }
+
+    private static void outputResults(String[] res) {
         File dir = new File("C:/Temp/cluster/");
         File[] files = dir.listFiles();
         for (File f : files) {  /* clear previously generated files */
-            if(!f.getName().equals("style.css")){
+            if (!f.getName().equals("style.css")) {
                 f.delete();
             }
         }
-        String[] linkArr = makePageLinks((int)Math.ceil(res.length/perPage));
+        String[] linkArr = makePageLinks((int) Math.ceil(res.length / perPage));
         int total = res.length;
         int currentPage = 0;
         int currentImage = 0;
-        while(currentImage < total) {
+        while (currentImage < total) {
             BufferedWriter out = null;
             try {
-                FileOutputStream fstream = new FileOutputStream("C:/Temp/cluster/results-"+currentPage+".html");
+                FileOutputStream fstream = new FileOutputStream("C:/Temp/cluster/results-" + currentPage + ".html");
                 out = new BufferedWriter(new OutputStreamWriter(fstream, "cp1250"));
-                out.write("<html><head><title>Results</title>" +
-                "<LINK REL=stylesheet TYPE=\"text/css\" HREF=\"style.css\">" +
-                "</head><body>");
+                out.write("<html><head><title>Results</title>"
+                        + "<LINK REL=stylesheet TYPE=\"text/css\" HREF=\"style.css\">"
+                        + "</head><body>");
 
                 //Generate links to other results pages
                 String links = "<b>Pages: </b>";
                 for (int i = 0; i < linkArr.length; i++) {
-                    String divider = i != linkArr.length-1 ? " | " : " ";
+                    String divider = i != linkArr.length - 1 ? " | " : " ";
                     String link = i == currentPage ? "" + i : linkArr[i];
                     links += link + divider;
                 }
@@ -150,7 +188,6 @@ public class Classify {
 //                }
 //            }
 
-
 //        for(StringBuffer result: res){
 //        BufferedWriter out = null;
 //            try {
@@ -168,31 +205,27 @@ public class Classify {
 //                    }
 //                }
 //            }
-
     /**
      * display the help text
      */
     public static void showHelp() {
-        System.out.println("Image Colour Analyser, Jesse Bordoe 2011\n"+
-                "Provide path to jpeg image or directory to scan. If a folder is provided," +
-                "all .jpeg files in the folder will be scanned");
+        System.out.println("Image Colour Analyser, Jesse Bordoe 2011\n"
+                + "Provide path to jpeg image or directory to scan. If a folder is provided,"
+                + "all .jpeg files in the folder will be scanned");
     }
 
     private static void init() {
         File thumbs = new File("C:/Temp/cluster/Thumbs");
-        if(!thumbs.exists()){
+        if (!thumbs.exists()) {
             thumbs.mkdir();
         }
     }
 
-    private static String[] makePageLinks(int pages){
+    private static String[] makePageLinks(int pages) {
         String[] links = new String[pages];
-        for(int i = 0; i < pages; i++){
-            links[i] = "<a href=\"results-"+i+".html\">"+i+"</a>";
+        for (int i = 0; i < pages; i++) {
+            links[i] = "<a href=\"results-" + i + ".html\">" + i + "</a>";
         }
         return links;
     }
-  
-
-
 }

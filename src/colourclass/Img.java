@@ -21,7 +21,6 @@ import javax.imageio.stream.*;
 public class Img {
 
     private static final Random rand = new Random();
-    private ArrayList<ImgCluster> clusters;
     private BufferedImage largeImage;
     private BufferedImage scaled;
     private ImgCluster[][] assignments;
@@ -34,84 +33,124 @@ public class Img {
     /**
      * width of image
      */
-    private int w;
+    private int width;
     /**
      * height of image
      */
-    private int h;
+    private int height;
+    
     Iterator iter;
     ImageWriter writer;
     ImageWriteParam iwp;
     /**
-     * length of longest side in rescaled image
+     * length of longest side in rescaled image, in pixels
      */
     private static final int rescale = 200;
     /**
      * number of clusters
      */
     private static final int k = 6;
+    /**
+     * Weight for x & y coordinates in transformed dataset for clustering Keep
+     * this low if clusters should ignore local colour similarity High if
+     * clusters are intended to represent spatial data too
+     */
+    private static final double spatialWeight = 0.01;
 
     public Img(BufferedImage image, String name) {
         this.name = name;
         this.largeImage = image;
+        this.height = image.getHeight();
+        this.width = image.getWidth();
     }
 
     public void findClusters() {
         double[][] dataset = to2DArray();
-        
+
         Clusterer clusterer = new Clusterer(dataset);
         clusterer.setVerbose(true);
         clusterer.setK(k);
-        
+
         Cluster[] clusters = clusterer.findClusters();
+        outputClusteredImage(clusters);
+
+
+    }
+
+    public void outputClusteredImage(Cluster[] clusters) {
+        iter = ImageIO.getImageWritersByFormatName("jpeg");
+        writer = (ImageWriter) iter.next();
+        // instantiate an ImageWriteParam object with default compression options
+        iwp = writer.getDefaultWriteParam();
+        iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        iwp.setCompressionQuality(1);
+        BufferedImage clusteredImg = new BufferedImage(largeImage.getWidth(), largeImage.getHeight(), BufferedImage.TYPE_INT_RGB);
+        for (Cluster cluster : clusters) {
+            double[][] dataPoints = cluster.getDataPoints();
+            double[] center = cluster.getCenter();
+            double cie1 = center[2];
+            double cie2 = center[3];
+            double cie3 = center[4];
+            double[] rgb = ColourspaceConverter.CIEtoRGB(cie1, cie2, cie3);
+            int rgbint = ((int) rgb[0] << 16) | ((int) rgb[1] << 8) | ((int) rgb[2]);
+            for (double[] d : dataPoints) {
+                int x = (int) (d[0] / spatialWeight);
+                int y = (int) (d[1] / spatialWeight);
+
+                clusteredImg.setRGB(x, y, rgbint);
+            }
+        }
+        outputJPEG(clusteredImg, "C:/Temp/cluster/test/" + System.currentTimeMillis() + ".jpg");
     }
 
     public double[][] to2DArray() {
-        int width = largeImage.getWidth();
-        int height = largeImage.getHeight();
-        
+        System.out.println("W: " + width + ", H: " + height);
+
         double[][] dataset = new double[width * height][5];
-        
-        for(int x = 0; x < width; x++) {
+
+        for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 int rgb = largeImage.getRGB(x, y);
                 int r = (rgb >> 16) & 0xff;
                 int g = (rgb >> 8) & 0xff;
                 int b = (rgb) & 0xff;
-                double[] cie = ColourspaceConverter.RGBtoCIE(r,g,b);
-                
-                dataset[x + y*width] = new double[]{x, y, cie[0], cie[1], cie[2]};                
+                double[] cie = ColourspaceConverter.RGBtoCIE(r, g, b);
+
+                double tx = ((double) x) * spatialWeight;
+                double ty = ((double) y) * spatialWeight;
+
+                dataset[x + y * width] = new double[]{tx, ty, cie[0], cie[1], cie[2]};
             }
         }
         return dataset;
     }
-
+    
     private void scanImage() {
         int largeW = largeImage.getWidth();
         int largeH = largeImage.getHeight();
         System.out.println("Original Image: " + largeW + "x" + largeH);
         if (largeW > largeH && largeW > rescale) {
-            w = rescale;
-            h = (largeH * rescale) / largeW;
+            width = rescale;
+            height = (largeH * rescale) / largeW;
         } else if (largeH >= largeW && largeH > rescale) {
-            h = rescale;
-            w = (largeW * rescale) / largeH;
+            height = rescale;
+            width = (largeW * rescale) / largeH;
         } else {
-            h = largeH;
-            w = largeW;
+            height = largeH;
+            width = largeW;
         }
 
-        scaled = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        scaled = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = scaled.createGraphics();
         AffineTransform at =
-                AffineTransform.getScaleInstance(((double) w / largeW), ((double) h / largeH));
+                AffineTransform.getScaleInstance(((double) width / largeW), ((double) height / largeH));
         g.drawRenderedImage(largeImage, at);
 
-        System.out.println("Resized to: " + w + "x" + h);
-        assignments = new ImgCluster[w][h];
-        grid = new DataPoint[w][h];
-        for (int i = 0; i < h; i++) {
-            for (int j = 0; j < w; j++) {
+        System.out.println("Resized to: " + width + "x" + height);
+        assignments = new ImgCluster[width][height];
+        grid = new DataPoint[width][height];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
                 int pixel = scaled.getRGB(j, i);
                 //pixels.add(new DataPoint(pixel,j,i));
                 grid[j][i] = new DataPoint(pixel, j, i);
@@ -124,17 +163,17 @@ public class Img {
         double avgR = 0.0;
         double avgG = 0.0;
         double avgB = 0.0;
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 double[] vals = grid[i][j].getVals();
                 avgR += vals[0];
                 avgG += vals[1];
                 avgB += vals[2];
             }
         }
-        avgR = avgR / (w * h);
-        avgG = avgG / (w * h);
-        avgB = avgB / (w * h);
+        avgR = avgR / (width * height);
+        avgG = avgG / (width * height);
+        avgB = avgB / (width * height);
         average = new DataPoint(new int[]{(int) avgR, (int) avgG, (int) avgB}, 0, 0);
     }
 
@@ -161,7 +200,7 @@ public class Img {
         iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
         iwp.setCompressionQuality(1);
         outputJPEG(scaled, "C:/Temp/cluster/thumbs/" + name + ".jpg");
-        BufferedImage segmentedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        BufferedImage segmentedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         results.append("<div>");
         results.append("<img src=\"thumbs/" + name + ".jpg\" id=\"pic-" + name + "\">"
                 + "<img src=\"thumbs/" + name + "-seg.jpg\" id=\"seg-" + name + "\">"
@@ -172,8 +211,8 @@ public class Img {
                 continue;
             }
 
-            //int percentage = (c.getSize()*100)/(w*h);
-            String percentage = oneDigit.format(((double) c.getSize() * 100) / (w * h));
+            //int percentage = (c.getSize()*100)/(width*height);
+            String percentage = oneDigit.format(((double) c.getSize() * 100) / (width * height));
             results.append("<div class=\"palette\" style=\""
                     + "background-color: " + c.getCenter().toHexTriplet() + "\" "
                     + "onmouseover=\"document.getElementById('cut-" + name + "').src='thumbs/" + name + "" + n + ".jpg'; "
@@ -184,8 +223,8 @@ public class Img {
 
             /* create graphical representation of cluster */
             ArrayList<DataPoint> members = c.getPixels();
-            BufferedImage clusterImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-            BufferedImage averagedImg = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+            BufferedImage clusterImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            BufferedImage averagedImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 
             for (DataPoint p : members) {
                 int pX = (int) p.getX();
@@ -269,7 +308,7 @@ public class Img {
                 sorted.add(c); //..otherwise add to end of list
             }
         }
-        clusters = sorted;
+        //clusters = sorted;
     }
 
     /**
@@ -277,7 +316,7 @@ public class Img {
      */
     private ArrayList<ImgCluster> sortClustersByRank() {
         for (ImgCluster c : getClusters()) {
-            c.rank(w, h);
+            c.rank(width, height);
         }
         ArrayList<ImgCluster> sorted = new ArrayList<ImgCluster>();
         while (getClusters().size() > 0) {
@@ -298,8 +337,8 @@ public class Img {
     }
 
     private void threshold() {
-        for (int i = 0; i < w; i++) {
-            for (int j = 0; j < h; j++) {
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
                 grid[i][j].RGBThreshold(1);
                 scaled.setRGB(i, j, grid[i][j].getArgb());
             }
@@ -310,7 +349,7 @@ public class Img {
      * @return the clusters
      */
     public ArrayList<ImgCluster> getClusters() {
-        return clusters;
+        return null; //clusters;
     }
 
     /**
